@@ -1,36 +1,102 @@
 package com.imageflowmeta.service.user;
 
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Collection;
+import java.util.Collections;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
+@EqualsAndHashCode
+@Getter
+@Setter
 @Entity
 @Table
-public class User {
+public class User implements UserDetails {
     @Id
     @SequenceGenerator(
-            name = "image_sequence",
-            sequenceName = "image_sequence",
+            name = "user_sequence",
+            sequenceName = "user_sequence",
             allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "image_sequence"
+            generator = "user_sequence"
     )
-    private @Getter @Setter Long id;
+    private Long id;
 
-    private @Getter @Setter String name;
-    private @Getter @Setter String email;
-    private @Getter @Setter LocalDate dob;
+    private String name;
+    private String username;
+    private String email;
+
+    private LocalDate dob;
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private UserRole userRole;
+
+    private Boolean locked = false;
+    private Boolean enabled= false;
+
+    public User(String name,
+                String username,
+                String email,
+                LocalDate dob,
+                String password,
+                UserRole userRole) {
+        this.name = name;
+        this.username = username;
+        this.email = email;
+        this.dob = dob;
+        this.password = password;
+        this.userRole = userRole;
+    }
 
     @Transient
     private Long age;
     public Integer getAge() {
         return Period.between(this.dob, LocalDate.now()).getYears();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(userRole.name());
+        return Collections.singletonList(authority);
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !locked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 }
