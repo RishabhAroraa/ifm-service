@@ -42,7 +42,7 @@ public class User implements UserDetails {
     private UserRole userRole;
 
     private Boolean locked = false;
-    private Boolean enabled= false;
+    private Boolean enabled = false;
 
     public User(String name,
                 String username,

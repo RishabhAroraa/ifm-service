@@ -36,10 +36,10 @@ public class UserService implements UserDetailsService {
         );
     }
 
+    @Transactional
     public String signUpUser(User user) {
-        boolean userExists = userRepository
-                .findByEmail(user.getEmail())
-                .isPresent();
+        boolean userExists = userRepository.existsByEmail(user.getEmail());
+
         if (userExists) {
             throw new IllegalStateException("email already taken");
         }
@@ -65,5 +65,9 @@ public class UserService implements UserDetailsService {
 
         return token;
 
+    }
+
+    public int enableUser(String email) {
+        return userRepository.enableUser(email);
     }
 }
